@@ -21,6 +21,8 @@ def RNG(a, b):
 
 
 def main():
+    leftEye = (300, 220)
+    rightEye = (340, 260)
     score = 0
     BLUEBoxReset= 50
     redBoxReset = 50
@@ -34,22 +36,30 @@ def main():
         while not BLUEtouching or not REDtouching:
             success, img = cap.read()
             imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             boxSize = 50
-            cv2.putText(img, str(int(score)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 3)
 
-            # cv2.rectangle(img, (0, 0), (widthCam, heightCam), (0, 0, 0), cv2.FILLED) # black background
+            cv2.rectangle(img, (0, 0), (widthCam, heightCam), (0, 0, 0), cv2.FILLED) # black background
+
 
             results = pose.process(imgRGB)
             # print(results.pose_landmarks)
 
             if results.pose_landmarks:
-                # mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS) #overall pose
+                mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS) #overall pose drawing
                 for id, lm in enumerate(results.pose_landmarks.landmark):
                     h, w, c = img.shape
                     # print(id, lm)
                     cx, cy = int(lm.x * w), int(lm.y * h)
+                    if id == 15:
+                        leftWristX, leftWristY = cx, cy
+                        print("leftWrist", leftWristX, leftWristY)
+                    if id==16:
+                        rightWristX, rightWristY = cx, cy
+                        print("rightWrist", rightWristX, rightWristY)
+                    # DRAW BOXES AND TOUCHING SENSE
                     # cv2.circle(img, (cx, cy), 5, (255, 0, 255), cv2.FILLED)
-                    if id == 20 or id == 19:
+                    if id == 20 or id == 19:  #arms
                         if BLUEBoxReset >= 50:
                             BLUEcoor1 = (RNG(0, widthCam - boxSize), RNG(0, heightCam - boxSize))
                             BLUEcoor2 = (BLUEcoor1[0] + boxSize, BLUEcoor1[1] + boxSize)
@@ -66,15 +76,19 @@ def main():
 
                         print(id, cx,cy)
                         if id == 20:
-                            cv2.line(img, (cx, cy), (cx,cy-100), (255, 0, 0), 10)
                             BLUElength = math.hypot(cx - BLUEmid[0], cy - BLUEmid[1])
+
+                            secondStickRightHandX, secondStickRightHandY = ((cx) + 3*(int(cx-rightWristX)), cy + 3*(int(cy-rightWristY)))
+                            cv2.line(img, (cx,cy), (int(secondStickRightHandX),int(secondStickRightHandY)), (255, 0, 0), 2)
 
                             if BLUElength < boxSize+50:
                                 score += 1
                                 BLUEtouching = True
                                 BLUEBoxReset = 300
                         elif id == 19:
-                            cv2.line(img, (cx, cy), (cx, cy-100), (0, 0, 255), 10)
+                            secondStickLeftHandX, secondStickLeftHandY = ( (cx) + 3 * (int(cx - leftWristX)), cy + 3 * (int(cy - leftWristY)))
+                            print(secondStickLeftHandX, secondStickLeftHandY)
+                            cv2.line(img, (cx,cy), (int(secondStickLeftHandX),int(secondStickLeftHandY)), (0, 0, 255), 2)
                             REDlength = math.hypot(cx - REDmid[0], cy - REDmid[1])
 
                             if REDlength < boxSize + 50:
@@ -88,7 +102,9 @@ def main():
                         cv2.rectangle(img, REDcoor1, REDcoor2, (0, 0, 255), 2)
                     except:
                         print("hand off screen")
-            cv2.imshow("Image", cv2.flip(img,1))
+            img = cv2.flip(img, 1)  # flip the frame horizontally
+            cv2.putText(img, str(int(score)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 3)
+            cv2.imshow("Image", img)
             cv2.waitKey(1)
 if __name__ == '__main__':
     main()
