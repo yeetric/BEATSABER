@@ -43,7 +43,7 @@ class handDetector():
 
             for id, lm in enumerate(myHands.landmark):
                 h, w, c = img.shape
-                cx, cy = int(lm.x * w), int(lm.y * h)
+                cx, cy = int(lm.abcNotation * w), int(lm.y * h)
                 # print(id, cx, cy)
                 lmList.append([id,cx,cy])
                 if draw:
