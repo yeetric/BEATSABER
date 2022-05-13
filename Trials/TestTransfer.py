@@ -45,8 +45,12 @@ def main():
     rightEye = (340, 260)  # right eye coordinates temperorary random
     score = 0
     BLUEBoxReset = 50  # box reset ticks. acts as timer for box reset
-    redBoxReset = 50
+    REDBoxReset = 50
     boxSize = 50
+    yOffset = 10
+    xOffset = 0
+    Xforward = True
+    BLUElengthCube = 40
     while True:
         BLUEtouching = False
         REDtouching = False
@@ -65,6 +69,7 @@ def main():
 
             if results.pose_landmarks:
                 mpDraw.draw_landmarks(img, results.pose_landmarks, mpPose.POSE_CONNECTIONS)  # overall pose drawing
+
                 for id, lm in enumerate(results.pose_landmarks.landmark):
                     h, w, c = img.shape
                     # print(id, lm)
@@ -81,21 +86,28 @@ def main():
                     if id == 20 or id == 19:  # arms
                         if BLUEBoxReset >= 50:  # box timer reaches 50 ticks
                             BLUEcoor1 = (RNG(0 + boxSize, int(widthCam / 2) + int(widthCam / 5)), RNG(0,
-                                                                                                      heightCam - boxSize))  # randomize box coordinates, blue only on mainly right side of screen
+                                           heightCam - boxSize))  # randomize box coordinates, blue only on mainly right side of screen
                             BLUEcoor2 = (BLUEcoor1[0] + boxSize,
                                          BLUEcoor1[1] + boxSize)  # creates other corner of box based on box size
                             BLUEmid = (int((BLUEcoor1[0] + BLUEcoor2[0]) / 2),
                                        int((BLUEcoor1[1] + BLUEcoor2[1]) / 2))  # center of box
                             BLUEBoxReset = 0  # reset box timer
-                        BLUEBoxReset += 1  # increment BLUE box timer
+                            BLUElengthCube = 0
+                        BLUElengthCube +=1
 
-                        if redBoxReset >= 50:
-                            REDcoor1 = (RNG((int(widthCam / 2) - int(widthCam / 5)), widthCam - boxSize),
-                                        RNG(0, heightCam - boxSize))
-                            REDcoor2 = (REDcoor1[0] + boxSize, REDcoor1[1] + boxSize)
-                            REDmid = (int((REDcoor1[0] + REDcoor2[0]) / 2), int((REDcoor1[1] + REDcoor2[1]) / 2))
-                            redBoxReset = 0
-                        redBoxReset += 1
+                        if REDBoxReset >= 50:
+                            if REDBoxReset >= 50:  # box timer reaches 50 ticks
+                                REDcoor1 = (RNG(0 + boxSize, int(widthCam / 2) + int(widthCam / 5)), RNG(0,
+                                                                                                         heightCam - boxSize))  # randomize box coordinates, blue only on mainly right side of screen
+                                REDcoor2 = (REDcoor1[0] + boxSize,
+                                            REDcoor1[1] + boxSize)  # creates other corner of box based on box size
+                                REDmid = (int((REDcoor1[0] + REDcoor2[0]) / 2),
+                                          int((REDcoor1[1] + REDcoor2[1]) / 2))  # center of box
+                                REDBoxReset = 0  # reset box timer
+                                REDlengthCube = 0
+                        REDlengthCube += 1
+
+                        REDBoxReset += 1  # increment RED box timer
 
                         print(id, cx, cy)  # prints landmarks info for debugging
 
@@ -138,12 +150,14 @@ def main():
                                 whichNote += 1  # increments which note to play
                                 score += 1  # increment score
                                 REDtouching = True
-                                redBoxReset = 100
+                                REDBoxReset = 100
                     try:
                         cv2.circle(img, BLUEmid, 5, (255, 0, 0), cv2.FILLED)
                         cv2.rectangle(img, BLUEcoor1, BLUEcoor2, (255, 0, 0), 2)
+
                         cv2.circle(img, REDmid, 5, (0, 0, 255), cv2.FILLED)
                         cv2.rectangle(img, REDcoor1, REDcoor2, (0, 0, 255), 2)
+                        cv2.imshow("BEATSABER", img)
                     except:
                         print("hand off screen")
             img = cv2.flip(img, 1)  # flip the frame horizontally

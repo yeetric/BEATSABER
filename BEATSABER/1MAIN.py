@@ -1,7 +1,7 @@
 import math
 import random
 import cv2  # images
-import mediapipe as mp  # trained models for landmark detection
+import mediapipe as mp  # have trained models for landmark detection, sufficient and more accurate than my own
 from pygame import mixer  # sounds
 
 mixer.init()  # play sounds init
